@@ -1,45 +1,60 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import React from "react";
+import { View, Text, FlatList, Button, StyleSheet } from "react-native";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function Layout() {
+  // Hardcoded list of to-dos for Milestone 1
+  const todoItems = [
+    { id: "1", task: "Buy milk" },
+    { id: "2", task: "Buy bread" },
+    { id: "3", task: "Buy eggs" },
+  ];
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+    <View style={styles.container}>
+      {/* Title */}
+      <Text style={styles.title}>My Todo List</Text>
+
+      <View style={{borderBottomColor: "black", borderBottomWidth: 1, marginBottom: 20,}}/>
+
+      {/* List of Todos */}
+      <FlatList
+        data={todoItems}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Text style={styles.todoItem}>{item.task}</Text>}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+
+      <View style={{borderBottomColor: "black", borderBottomWidth: 1, marginBottom: 20,}}/>
+
+      {/* Add New Todo Button */}
+      <View style={styles.buttonContainer}>
+        <Button title="Add New Todo" onPress={() => {}} />
+      </View>
+    </View>
   );
 }
+
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f8f9fa",
+    justifyContent: "space-between",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  todoItem: {
+    fontSize: 18,
+    padding: 5,
+    backgroundColor: "#ADD8E6",
+    marginVertical: 5,
+    borderRadius: 5,
+  },
+  buttonContainer: {
+    marginBottom: 20,
+  },
+});
