@@ -2,14 +2,24 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface Todo {
+    id: string;
+    task: string;
+    description: string;
+    expanded: boolean;
+    finished: boolean;
+}
+
+const STORAGE_KEY = '@todos_key';
 
 export default function AddTodoScreen() {
     const router = useRouter();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
 
-    const handleSave = () => {
-        // Input validation
+    const handleSave = async () => {
         if (!title.trim()) {
             Alert.alert("Validation Error", "Please enter a title");
             return;
@@ -19,21 +29,37 @@ export default function AddTodoScreen() {
             return;
         }
 
-        // Success case
-        Alert.alert(
-            "Success",
-            "Todo Added Successfully",
-            [
-                {
+        try {
+            const storedTodos = await AsyncStorage.getItem(STORAGE_KEY);
+            const todos: Todo[] = storedTodos ? JSON.parse(storedTodos) : [];
+            
+            const newTodo: Todo = {
+                id: Date.now().toString(), // Simple unique ID generation
+                task: title,
+                description: description,
+                expanded: false,
+                finished: false
+            };
+
+            const updatedTodos = [...todos, newTodo];
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTodos));
+
+            Alert.alert(
+                "Success",
+                "Todo Added Successfully",
+                [{
                     text: "OK",
                     onPress: () => {
                         setTitle("");
                         setDescription("");
                     }
-                }
-            ],
-            { cancelable: false }
-        );
+                }],
+                { cancelable: false }
+            );
+        } catch (error) {
+            console.error('Error saving todo:', error);
+            Alert.alert("Error", "Failed to save todo");
+        }
     };
 
     return (
@@ -85,7 +111,6 @@ export default function AddTodoScreen() {
     );
 }
 
-// Styles remain unchanged
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,

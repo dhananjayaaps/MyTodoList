@@ -1,23 +1,63 @@
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router"; // Add useFocusEffect
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react"; // Add useCallback
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Todo {
     id: string;
     task: string;
     description: string;
     expanded: boolean;
-    finished: boolean; // Made required since we want explicit state
+    finished: boolean;
 }
+
+const STORAGE_KEY = '@todos_key';
 
 export default function HomeScreen() {
     const router = useRouter();
-    const [todos, setTodos] = useState<Todo[]>([
-        { id: "1", task: "Buy groceries", description: "Milk, bread, eggs", expanded: false, finished: false },
-        { id: "2", task: "Complete assignment", description: "Math homework due tomorrow", expanded: false, finished: false },
-        { id: "3", task: "Go for a run", description: "5km around the park", expanded: false, finished: false },
-    ]);
+    const [todos, setTodos] = useState<Todo[]>([]);
+
+    // Function to load todos from AsyncStorage
+    const loadTodos = useCallback(async () => {
+        try {
+            const storedTodos = await AsyncStorage.getItem(STORAGE_KEY);
+            if (storedTodos) {
+                setTodos(JSON.parse(storedTodos));
+            } else {
+                const initialTodos: Todo[] = [
+                    { id: "1", task: "Buy groceries", description: "Milk, bread, eggs", expanded: false, finished: false },
+                    { id: "2", task: "Complete assignment", description: "Math homework due tomorrow", expanded: false, finished: false },
+                    { id: "3", task: "Go for a run", description: "5km around the park", expanded: false, finished: false },
+                ];
+                setTodos(initialTodos);
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(initialTodos));
+            }
+        } catch (error) {
+            console.error('Error loading todos:', error);
+        }
+    }, []);
+
+    // Load todos when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            loadTodos();
+        }, [loadTodos])
+    );
+
+    // Save todos to AsyncStorage whenever they change
+    React.useEffect(() => {
+        const saveTodos = async () => {
+            try {
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+            } catch (error) {
+                console.error('Error saving todos:', error);
+            }
+        };
+        if (todos.length > 0) {
+            saveTodos();
+        }
+    }, [todos]);
 
     const toggleExpand = (id: string) => {
         setTodos(todos.map(todo => 
