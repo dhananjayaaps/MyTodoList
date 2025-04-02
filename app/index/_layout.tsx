@@ -8,15 +8,15 @@ interface Todo {
     task: string;
     description: string;
     expanded: boolean;
-    finished?: boolean;
+    finished: boolean; // Made required since we want explicit state
 }
 
 export default function HomeScreen() {
     const router = useRouter();
     const [todos, setTodos] = useState<Todo[]>([
-        { id: "1", task: "Buy groceries", description: "Milk, bread, eggs", expanded: false },
-        { id: "2", task: "Complete assignment", description: "Math homework due tomorrow", expanded: false },
-        { id: "3", task: "Go for a run", description: "5km around the park", expanded: false },
+        { id: "1", task: "Buy groceries", description: "Milk, bread, eggs", expanded: false, finished: false },
+        { id: "2", task: "Complete assignment", description: "Math homework due tomorrow", expanded: false, finished: false },
+        { id: "3", task: "Go for a run", description: "5km around the park", expanded: false, finished: false },
     ]);
 
     const toggleExpand = (id: string) => {
@@ -38,7 +38,12 @@ export default function HomeScreen() {
     const renderTodoItem = ({ item }: { item: Todo }) => (
         <View style={styles.todoContainer}>
             <View style={styles.todoHeader}>
-                <Text style={styles.todoItem}>{item.task}</Text>
+                <Text style={[
+                    styles.todoItem,
+                    item.finished && styles.finishedText
+                ]}>
+                    {item.task}
+                </Text>
                 <TouchableOpacity onPress={() => toggleExpand(item.id)}>
                     <Ionicons 
                         name={item.expanded ? "caret-up" : "caret-down"} 
@@ -52,16 +57,17 @@ export default function HomeScreen() {
                 <View style={styles.expandedContent}>
                     <Text style={styles.description}>{item.description}</Text>
                     <View style={styles.controlPanel}>
-                        <TouchableOpacity 
-                            onPress={() => markAsFinished(item.id)}
-                            disabled={item.finished}
-                        >
-                            <Ionicons 
-                                name="checkmark-circle" 
-                                size={24} 
-                                color={item.finished ? "gray" : "green"} 
-                            />
-                        </TouchableOpacity>
+                        {!item.finished && (
+                            <TouchableOpacity 
+                                onPress={() => markAsFinished(item.id)}
+                            >
+                                <Ionicons 
+                                    name="checkmark-circle" 
+                                    size={24} 
+                                    color="green" 
+                                />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity onPress={() => deleteTodo(item.id)}>
                             <Ionicons name="trash" size={24} color="red" />
                         </TouchableOpacity>
@@ -145,6 +151,10 @@ const styles = StyleSheet.create({
     todoItem: {
         fontSize: 18,
         flex: 1,
+    },
+    finishedText: {
+        textDecorationLine: "line-through",
+        color: "#666",
     },
     expandedContent: {
         padding: 10,
