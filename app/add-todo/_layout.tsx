@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function AddTodoScreen() {
@@ -8,11 +8,38 @@ export default function AddTodoScreen() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
 
+    const handleSave = () => {
+        // Input validation
+        if (!title.trim()) {
+            Alert.alert("Validation Error", "Please enter a title");
+            return;
+        }
+        if (!description.trim()) {
+            Alert.alert("Validation Error", "Please enter a description");
+            return;
+        }
+
+        // Success case
+        Alert.alert(
+            "Success",
+            "Todo Added Successfully",
+            [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        setTitle("");
+                        setDescription("");
+                    }
+                }
+            ],
+            { cancelable: false }
+        );
+    };
+
     return (
         <View style={styles.mainContainer}>
-            {/* App Bar */}
             <View style={styles.appBar}>
-                <TouchableOpacity style={styles.Backbutton} onPress={() => router.push("/")}>
+                <TouchableOpacity style={styles.Backbutton} onPress={() => router.push("../")}>
                     <Ionicons name="arrow-back" size={24} color="blue" />
                 </TouchableOpacity>
                 <Text style={styles.appBarTitle}>Add Todo</Text>
@@ -21,12 +48,9 @@ export default function AddTodoScreen() {
 
             <View style={styles.container}>
                 <Text style={styles.title}>Add New Todo</Text>
-
-                {/* Horizonatal Bar */}
                 <View style={{ height: 1, backgroundColor: "black", marginBottom: 20 }} />
 
                 <View style={styles.content}>
-                    {/* Title Label and Input */}
                     <Text style={styles.label}>Title</Text>
                     <TextInput
                         style={styles.input}
@@ -35,7 +59,6 @@ export default function AddTodoScreen() {
                         onChangeText={setTitle}
                     />
 
-                    {/* Description Label and Input */}
                     <Text style={styles.label}>Description</Text>
                     <TextInput
                         style={styles.textArea}
@@ -46,25 +69,23 @@ export default function AddTodoScreen() {
                     />
                 </View>
 
-                {/* Buttons */}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
                         <Ionicons name="backspace" size={24} color="green" />
                         <Text style={styles.buttonText}> Cancel</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.saveButton}>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                         <Ionicons name="save" size={20} color="green" />
                         <Text style={styles.buttonText}> Save</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </View>
-
     );
 }
 
-// Styles
+// Styles remain unchanged
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
@@ -79,7 +100,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-
     },
     title: {
         fontSize: 24,
@@ -157,4 +177,3 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
 });
-
